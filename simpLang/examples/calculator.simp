@@ -1,0 +1,29 @@
+// ===========================================
+// Simple Calculator
+// ===========================================
+
+import stdlib
+
+say("=== Simple Calculator ===")
+say("")
+
+// Get numbers from user
+say("Enter first number: ")
+a = convert_to_num(ask())
+
+say("Enter second number: ")
+b = convert_to_num(ask())
+
+// Do calculations
+result_add = stdlib.math_add(a, b)
+result_sub = stdlib.math_subtract(a, b)
+result_mul = stdlib.math_multiply(a, b)
+result_div = stdlib.math_divide(a, b)
+
+// Show results (convert numbers to text for display)
+say("")
+say("Results:")
+say(convert_to_txt(a) + " + " + convert_to_txt(b) + " = " + convert_to_txt(result_add))
+say(convert_to_txt(a) + " - " + convert_to_txt(b) + " = " + convert_to_txt(result_sub))
+say(convert_to_txt(a) + " × " + convert_to_txt(b) + " = " + convert_to_txt(result_mul))
+say(convert_to_txt(a) + " ÷ " + convert_to_txt(b) + " = " + convert_to_txt(result_div))

@@ -1,0 +1,146 @@
+// ======================================
+// SimpLang v2.0 FULL STRESS TEST
+// One file to push everything to the limit
+// ======================================
+
+say("=== STARTING STRESS TEST ===")
+
+// ======================================
+// 1. Expression & precedence test
+// ======================================
+
+say(10 + 2 * 3)
+say((10 + 2) * 3)
+say(100 / 5 / 2)
+say(2 + 3 + 4 * 5 - 6 / 2)
+
+
+// ======================================
+// 2. Variable mutation + loop test
+// ======================================
+
+x = 0
+
+loop while x < 20
+    x = x + 1
+
+    if math_remainder(x, 5) == 0
+        say(x)
+    end
+end
+
+
+// ======================================
+// 3. Nested block stress test
+// ======================================
+
+y = 0
+
+loop while y < 2
+    if y < 2
+        loop i = 1 to 3
+            if i == 2
+                say("middle")
+            else
+                say("other")
+            end
+        end
+    end
+
+    y = y + 1
+end
+
+
+// ======================================
+// 4. Functions + recursion test
+// ======================================
+
+fun countdown(n)
+    if n == 0
+        say("done")
+    else
+        say(n)
+        countdown(n - 1)
+    end
+end
+
+countdown(3)
+
+
+// ======================================
+// 5. String chaos test
+// ======================================
+
+text = "hello"
+
+say(string_reverse(text))
+say(string_uppercase(string_reverse(text)))
+say(string_contains(text + " world", "world"))
+say(string_replace("aaaa", "a", "b"))
+
+
+// ======================================
+// 6. List stress test
+// ======================================
+
+nums = [1,2,3,4,5]
+
+list_additem(nums, 6)
+list_removeitem(nums, 3)
+
+say(nums)
+
+loop n in nums
+    say(n * 2)
+end
+
+
+// ======================================
+// 7. Type conversion test
+// ======================================
+
+a = "10"
+b = 5
+
+say(convert_to_num(a) + b)
+say(convert_to_txt(b) + a)
+
+
+// ======================================
+// 8. Deep function nesting
+// ======================================
+
+fun f(x)
+    ret x + 1
+end
+
+fun g(x)
+    ret f(x) * 2
+end
+
+fun h(x)
+    ret g(f(g(x)))
+end
+
+say(h(5))
+
+
+// ======================================
+// 9. Loop safety test
+// ======================================
+
+z = 0
+
+loop while z < 5
+    say(z)
+    z = z + 1
+end
+
+
+// ======================================
+// 10. Extreme one-line parser stress test
+// ======================================
+
+say(string_reverse(convert_to_txt(math_random(1, 50) + 5 * (2 + 3))))
+
+say("=== STRESS TEST COMPLETE ===")

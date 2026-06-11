@@ -1,0 +1,34 @@
+// ===========================================
+// Hello World - Your first SimpLang program
+// ===========================================
+
+// say() prints text to the screen (like print)
+say("Hello, World!")
+say("Welcome to SimpLang!")
+say("")
+
+// Variables - just use a name and =
+name = "Alex"
+age = 25
+
+// Convert numbers to strings when joining with text
+say("My name is " + name + " and I am " + convert_to_txt(age) + " years old.")
+
+// ask() gets input from the user (like input)
+say("")
+say("What's your name?")
+user_name = ask()
+say(convert_to_txt(10 + 5))
+x = 5 + 3 * 2
+say(x)
+age = convert_to_num(ask())
+say(age + 10)
+x = 0
+
+loop while x < 3
+    say(x)
+    x = x + 1
+end
+
+say("done")
+say("Nice to meet you, " + user_name + "!")
