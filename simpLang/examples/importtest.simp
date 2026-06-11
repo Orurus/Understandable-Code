@@ -1,3 +1,0 @@
-import /src/myutils.simp
-x = 4
-say(myutils.factorial(x))

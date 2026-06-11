@@ -11,6 +11,7 @@ The current version also includes:
 - symbolic logical operators such as `&&`, `||`, `&`, and `|`
 - tensor and matrix helpers for ML-style experiments
 - advanced ML helpers for attention, optimization, and training-state ideas
+- Currently cannot support cases with 4 bool expression in a row. E.g. "If X is smaller and not equal to Y"!
 
 ---
 

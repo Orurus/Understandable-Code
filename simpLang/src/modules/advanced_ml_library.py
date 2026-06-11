@@ -162,7 +162,8 @@ def compute_binary_cross_entropy_loss(predicted_matrix, target_matrix):
     count = 0
     for row_pred, row_target in zip(predicted_matrix, target_matrix):
         for value_pred, value_target in zip(row_pred, row_target):
-            clipped = max(min(value_pred, 1.0 - 1e-7), 1e-7)
+            eps = 1e-7
+            clipped = min(max(value_pred, eps), 1.0 - eps)
             total += -(value_target * math.log(clipped) + (1.0 - value_target) * math.log(1.0 - clipped))
             count += 1
     return total / count if count else 0.0
