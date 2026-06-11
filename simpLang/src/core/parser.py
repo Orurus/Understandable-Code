@@ -2,8 +2,12 @@
 SimpLang Parser — Converts tokens into an AST with clear error messages.
 """
 
-from lexer import Token, TOKEN, SimpLangError
-from ast_nodes import *
+try:
+    from .lexer import Token, TOKEN, SimpLangError
+    from .ast_nodes import *
+except ImportError:
+    from lexer import Token, TOKEN, SimpLangError
+    from ast_nodes import *
 
 
 class ParserError(SimpLangError):
@@ -111,9 +115,24 @@ class Parser:
         return self.parse_expression_stmt()
 
     def parse_import(self):
-        """import name"""
+        """import name or import /path/to/module.simp"""
         tok = self.advance()  # import
-        name = self.expect(TOKEN['IDENTIFIER']).value
+        start_line = tok.line
+
+        tokens = []
+        while self.pos < len(self.tokens):
+            next_tok = self.peek()
+            if next_tok.type == TOKEN['EOF'] or next_tok.line != start_line:
+                break
+            if next_tok.type in (TOKEN['IDENTIFIER'], TOKEN['DIV'], TOKEN['DOT']):
+                tokens.append(self.advance())
+            else:
+                break
+
+        if not tokens:
+            raise self.error("Expected a module name or path after 'import'")
+
+        name = ''.join(token.value for token in tokens)
         return ImportStmt(pos=self.mk_pos(tok), name=name)
 
     def parse_fun_def(self):
@@ -203,14 +222,11 @@ class Parser:
     def parse_expression_stmt(self):
         """Parse an expression used as a statement (assignment, call, etc.)"""
         tok = self.peek()
-        # Check for assignment: identifier =
-        if self.check(TOKEN['IDENTIFIER']) and self.peek(1).type == TOKEN['ASSIGN']:
-            name = self.advance().value  # consume identifier
-            self.advance()  # consume =
-            expr = self.parse_expression()
-            return AssignStmt(pos=self.mk_pos(tok), name=name, expr=expr)
-
         expr = self.parse_expression()
+
+        if isinstance(expr, AssignStmt):
+            return AssignStmt(pos=self.mk_pos(tok), name=getattr(expr.target, 'name', ''), target=expr.target, expr=expr.expr)
+
         return ExprStmt(pos=self.mk_pos(tok), expr=expr)
 
     def parse_block(self, terminators: list) -> list:
@@ -230,22 +246,92 @@ class Parser:
     # ----------------------------------------------------------------
     # EXPRESSIONS (PEMDAS: + - * / == != < > <= >= and or not)
     # ----------------------------------------------------------------
+    def _is_assignable(self, node):
+        return isinstance(node, (Identifier, Subscript))
+
     def parse_expression(self):
-        """Lowest precedence: and / or"""
+        """Lowest precedence: assignment, then and / or"""
         left = self.parse_comparison()
+
+        if self.check(TOKEN['ASSIGN']) and self._is_assignable(left):
+            self.advance()
+            right = self.parse_expression()
+            return AssignStmt(target=left, expr=right)
+
         while self.check(TOKEN['AND']) or self.check(TOKEN['OR']):
             op = self.advance().value
             right = self.parse_comparison()
             left = BinaryOp(left=left, op=op, right=right)
         return left
 
-    def parse_comparison(self):
-        """== != < > <= >="""
-        left = self.parse_term()
-        while self.check(TOKEN['EQ'], TOKEN['NEQ'], TOKEN['LT'], TOKEN['GT'], TOKEN['LTE'], TOKEN['GTE']):
-            op = self.advance().value
+    def _parse_symbolic_comparison_phrase(self, left):
+        """Parse English-style comparison phrases with optional joining words."""
+        if self.check(TOKEN['IS']):
+            self.advance()
+
+        if self.check(TOKEN['NOT']):
+            self.advance()
+            if self.check(TOKEN['EQUAL']):
+                self.advance()
+            if self.check(TOKEN['TO']):
+                self.advance()
             right = self.parse_term()
-            left = BinaryOp(left=left, op=op, right=right)
+            return BinaryOp(left=left, op='!=', right=right)
+
+        if not self.check(TOKEN['BIGGER'], TOKEN['SMALLER'], TOKEN['EQUAL']):
+            return None
+
+        op_token = self.advance().type
+
+        if self.check(TOKEN['OR'], TOKEN['AND']) and self.peek(1).type == TOKEN['EQUAL']:
+            self.advance()
+            if self.check(TOKEN['EQUAL']):
+                self.advance()
+            if self.check(TOKEN['TO']):
+                self.advance()
+            right = self.parse_term()
+
+            if op_token == TOKEN['BIGGER']:
+                op = '>='
+            elif op_token == TOKEN['SMALLER']:
+                op = '<='
+            else:
+                op = '=='
+            return BinaryOp(left=left, op=op, right=right)
+
+        if self.check(TOKEN['THAN']):
+            self.advance()
+        elif op_token == TOKEN['EQUAL'] and self.check(TOKEN['TO']):
+            self.advance()
+
+        right = self.parse_term()
+
+        if op_token == TOKEN['BIGGER']:
+            op = '>'
+        elif op_token == TOKEN['SMALLER']:
+            op = '<'
+        else:
+            op = '=='
+        return BinaryOp(left=left, op=op, right=right)
+
+    def parse_comparison(self):
+        """Parse comparison expressions using either symbol or English-style phrases."""
+        left = self.parse_term()
+
+        while True:
+            if self.check(TOKEN['EQ']) or self.check(TOKEN['NEQ']) or self.check(TOKEN['LT']) or self.check(TOKEN['GT']) or self.check(TOKEN['LTE']) or self.check(TOKEN['GTE']):
+                op = self.advance().value
+                right = self.parse_term()
+                left = BinaryOp(left=left, op=op, right=right)
+                continue
+
+            phrase = self._parse_symbolic_comparison_phrase(left)
+            if phrase is not None:
+                left = phrase
+                continue
+
+            break
+
         return left
 
     def parse_term(self):
@@ -260,7 +346,7 @@ class Parser:
     def parse_factor(self):
         """* /"""
         left = self.parse_unary()
-        while self.check(TOKEN['MUL']) or self.check(TOKEN['DIV']):
+        while self.check(TOKEN['MUL']) or self.check(TOKEN['DIV']) or self.check(TOKEN['MOD']):
             op = self.advance().value
             right = self.parse_unary()
             left = BinaryOp(left=left, op=op, right=right)

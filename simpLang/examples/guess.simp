@@ -14,20 +14,20 @@ guess = 0
 tries = 0
 
 // Keep guessing until correct
-loop while guess != secret
+loop while guess is not secret
     say("Your guess: ")
     guess = convert_to_num(ask())
     tries = tries + 1
 
-    if guess < secret
+    if guess is smaller than secret
         say("Too low! Try again.")
     end
 
-    if guess > secret
+    if guess is bigger than secret
         say("Too high! Try again.")
     end
 
-    if guess == secret
+    if guess is equal to secret
         say("")
         say("You got it! The number was " + convert_to_txt(secret))
         say("It took you " + convert_to_txt(tries) + " tries!")

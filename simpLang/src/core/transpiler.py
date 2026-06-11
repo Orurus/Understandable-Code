@@ -13,6 +13,11 @@ Handles:
 
 import re
 
+try:
+    from . import stdlib  # noqa: F401
+except ImportError:
+    import stdlib  # noqa: F401
+
 
 def transpile(code: str) -> str:
     """Convert SimpLang code to Python code with proper indentation."""
@@ -115,6 +120,16 @@ def transpile(code: str) -> str:
             increases_indent = True
 
         # --- Keyword replacements ---
+        # Logical operators and comparisons
+        transformed = transformed.replace('&&', 'and').replace('||', 'or')
+        transformed = transformed.replace('&', 'and').replace('|', 'or')
+        transformed = re.sub(r"\bis\s+not\b", "!=", transformed)
+        transformed = re.sub(r"\bis\s+bigger\s+than\b", ">", transformed)
+        transformed = re.sub(r"\bis\s+smaller\s+than\b", "<", transformed)
+        transformed = re.sub(r"\bis\s+equal\s+to\b", "==", transformed)
+        transformed = re.sub(r"\bis\s+smaller\b", "<", transformed)
+        transformed = re.sub(r"\bis\s+bigger\b", ">", transformed)
+
         # say() → print()
         transformed = re.sub(r"\bsay\s*\(", "print(", transformed)
         # ask() → input()

@@ -1,29 +1,123 @@
-// ===========================================
-// Simple Calculator
-// ===========================================
-
 import stdlib
 
-say("=== Simple Calculator ===")
-say("")
+// -----------------------------
+// Activation functions
+// -----------------------------
 
-// Get numbers from user
-say("Enter first number: ")
-a = convert_to_num(ask())
+fun sigmoid(x)
+    ret 1 / (1 + stdlib.math_power(2.71828, -x))
+end
 
-say("Enter second number: ")
-b = convert_to_num(ask())
+fun sigmoid_derivative(x)
+    ret x * (1 - x)
+end
 
-// Do calculations
-result_add = stdlib.math_add(a, b)
-result_sub = stdlib.math_subtract(a, b)
-result_mul = stdlib.math_multiply(a, b)
-result_div = stdlib.math_divide(a, b)
+// -----------------------------
+// Training data (XOR)
+// -----------------------------
 
-// Show results (convert numbers to text for display)
-say("")
-say("Results:")
-say(convert_to_txt(a) + " + " + convert_to_txt(b) + " = " + convert_to_txt(result_add))
-say(convert_to_txt(a) + " - " + convert_to_txt(b) + " = " + convert_to_txt(result_sub))
-say(convert_to_txt(a) + " × " + convert_to_txt(b) + " = " + convert_to_txt(result_mul))
-say(convert_to_txt(a) + " ÷ " + convert_to_txt(b) + " = " + convert_to_txt(result_div))
+data = [
+    [0, 0, 0],
+    [0, 1, 1],
+    [1, 0, 1],
+    [1, 1, 0]
+]
+
+// -----------------------------
+// Initialize weights
+// -----------------------------
+
+w1 = [stdlib.math_random(-1, 1), stdlib.math_random(-1, 1)]
+w2 = [stdlib.math_random(-1, 1), stdlib.math_random(-1, 1)]
+w3 = [stdlib.math_random(-1, 1), stdlib.math_random(-1, 1)]
+
+// bias
+b1 = 0
+b2 = 0
+b3 = 0
+
+learning_rate = 0.1
+
+// -----------------------------
+// Training loop
+// -----------------------------
+
+loop epoch = 1 to 2000
+
+    total_error = 0
+
+    loop sample in data
+
+        x1 = sample[0]
+        x2 = sample[1]
+        target = sample[2]
+
+        // -----------------
+        // Forward pass
+        // -----------------
+
+        h1 = sigmoid(x1 * w1[0] + x2 * w1[1] + b1)
+        h2 = sigmoid(x1 * w2[0] + x2 * w2[1] + b2)
+
+        output = sigmoid(h1 * w3[0] + h2 * w3[1] + b3)
+
+        error = target - output
+        total_error = total_error + stdlib.math_absolute(error)
+
+        // -----------------
+        // Backprop (manual)
+        // -----------------
+
+        d_output = error * sigmoid_derivative(output)
+
+        d_h1 = d_output * w3[0] * sigmoid_derivative(h1)
+        d_h2 = d_output * w3[1] * sigmoid_derivative(h2)
+
+        // -----------------
+        // Update output weights
+        // -----------------
+
+        w3[0] = w3[0] + learning_rate * d_output * h1
+        w3[1] = w3[1] + learning_rate * d_output * h2
+        b3 = b3 + learning_rate * d_output
+
+        // -----------------
+        // Update hidden weights
+        // -----------------
+
+        w1[0] = w1[0] + learning_rate * d_h1 * x1
+        w1[1] = w1[1] + learning_rate * d_h1 * x2
+        b1 = b1 + learning_rate * d_h1
+
+        w2[0] = w2[0] + learning_rate * d_h2 * x1
+        w2[1] = w2[1] + learning_rate * d_h2 * x2
+        b2 = b2 + learning_rate * d_h2
+
+    end
+
+    if epoch % 200 == 0
+        say("Epoch: " + convert_to_txt(epoch))
+        say("Error: " + convert_to_txt(total_error))
+    end
+
+end
+
+// -----------------------------
+// Test after training
+// -----------------------------
+
+say("Testing:")
+
+loop sample in data
+
+    x1 = sample[0]
+    x2 = sample[1]
+
+    h1 = sigmoid(x1 * w1[0] + x2 * w1[1] + b1)
+    h2 = sigmoid(x1 * w2[0] + x2 * w2[1] + b2)
+
+    output = sigmoid(h1 * w3[0] + h2 * w3[1] + b3)
+
+    say("Input: " + convert_to_txt(x1) + "," + convert_to_txt(x2))
+    say("Output: " + convert_to_txt(output))
+end

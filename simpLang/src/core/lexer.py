@@ -49,6 +49,11 @@ TOKEN = {
     'AND': 'AND',
     'OR': 'OR',
     'NOT': 'NOT',
+    'IS': 'IS',
+    'BIGGER': 'BIGGER',
+    'SMALLER': 'SMALLER',
+    'EQUAL': 'EQUAL',
+    'THAN': 'THAN',
     # Literals / identifiers
     'IDENTIFIER': 'IDENTIFIER',
     'NUMBER': 'NUMBER',
@@ -58,6 +63,7 @@ TOKEN = {
     'MINUS': 'MINUS',
     'MUL': 'MUL',
     'DIV': 'DIV',
+    'MOD': 'MOD',
     'EQ': 'EQ',
     'NEQ': 'NEQ',
     'LT': 'LT',
@@ -100,6 +106,11 @@ KEYWORDS = {
     'and': TOKEN['AND'],
     'or': TOKEN['OR'],
     'not': TOKEN['NOT'],
+    'is': TOKEN['IS'],
+    'bigger': TOKEN['BIGGER'],
+    'smaller': TOKEN['SMALLER'],
+    'equal': TOKEN['EQUAL'],
+    'than': TOKEN['THAN'],
 }
 
 
@@ -251,6 +262,24 @@ class Lexer:
                 self.advance()
                 self.advance()
                 continue
+            if ch == '&' and next_ch == '&':
+                tokens.append(Token(TOKEN['AND'], 'and', line, col, self.filename))
+                self.advance()
+                self.advance()
+                continue
+            if ch == '|' and next_ch == '|':
+                tokens.append(Token(TOKEN['OR'], 'or', line, col, self.filename))
+                self.advance()
+                self.advance()
+                continue
+            if ch == '&':
+                tokens.append(Token(TOKEN['AND'], 'and', line, col, self.filename))
+                self.advance()
+                continue
+            if ch == '|':
+                tokens.append(Token(TOKEN['OR'], 'or', line, col, self.filename))
+                self.advance()
+                continue
             if ch == '!' and next_ch == '=':
                 tokens.append(Token(TOKEN['NEQ'], '!=', line, col, self.filename))
                 self.advance()
@@ -273,6 +302,7 @@ class Lexer:
                 '-': TOKEN['MINUS'],
                 '*': TOKEN['MUL'],
                 '/': TOKEN['DIV'],
+                '%': TOKEN['MOD'],
                 '=': TOKEN['ASSIGN'],
                 '<': TOKEN['LT'],
                 '>': TOKEN['GT'],

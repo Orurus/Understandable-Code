@@ -1,146 +1,54 @@
-// ======================================
-// SimpLang v2.0 FULL STRESS TEST
-// One file to push everything to the limit
-// ======================================
+import tensor_matrix_library
+import advanced_ml_library
+import stdlib
 
-say("=== STARTING STRESS TEST ===")
+// -------------------------
+// Create training data
+// -------------------------
 
-// ======================================
-// 1. Expression & precedence test
-// ======================================
+inputs = tensor_matrix_library.new_matrix_with_random_values(5, 1, 0, 1)
+targets = inputs
 
-say(10 + 2 * 3)
-say((10 + 2) * 3)
-say(100 / 5 / 2)
-say(2 + 3 + 4 * 5 - 6 / 2)
+// -------------------------
+// Create model weights
+// -------------------------
 
+weights = advanced_ml_library.create_neural_network_layer_with_random_weights(1, 1)
+bias = advanced_ml_library.create_neural_network_bias_vector(1)
 
-// ======================================
-// 2. Variable mutation + loop test
-// ======================================
+// -------------------------
+// Training loop
+// -------------------------
 
-x = 0
+learning_rate = 0.1
+epoch = 0
 
-loop while x < 20
-    x = x + 1
+loop while epoch is smaller than 10
 
-    if math_remainder(x, 5) == 0
-        say(x)
-    end
+    // forward pass (linear model)
+    predictions = tensor_matrix_library.multiply_matrix_by_matrix(inputs, weights)
+
+    // loss
+    loss = advanced_ml_library.compute_mean_squared_error(predictions, targets)
+
+    say("Epoch " + convert_to_txt(epoch))
+    say("Loss: " + convert_to_txt(loss))
+
+    // gradient (simple approximation step)
+    gradients = advanced_ml_library.create_weight_update_using_error_signal(
+        weights,
+        targets,
+        learning_rate
+    )
+
+    // update weights
+    weights = advanced_ml_library.create_gradient_descent_optimization_step(
+        weights,
+        gradients,
+        learning_rate
+    )
+
+    epoch = epoch + 1
 end
 
-
-// ======================================
-// 3. Nested block stress test
-// ======================================
-
-y = 0
-
-loop while y < 2
-    if y < 2
-        loop i = 1 to 3
-            if i == 2
-                say("middle")
-            else
-                say("other")
-            end
-        end
-    end
-
-    y = y + 1
-end
-
-
-// ======================================
-// 4. Functions + recursion test
-// ======================================
-
-fun countdown(n)
-    if n == 0
-        say("done")
-    else
-        say(n)
-        countdown(n - 1)
-    end
-end
-
-countdown(3)
-
-
-// ======================================
-// 5. String chaos test
-// ======================================
-
-text = "hello"
-
-say(string_reverse(text))
-say(string_uppercase(string_reverse(text)))
-say(string_contains(text + " world", "world"))
-say(string_replace("aaaa", "a", "b"))
-
-
-// ======================================
-// 6. List stress test
-// ======================================
-
-nums = [1,2,3,4,5]
-
-list_additem(nums, 6)
-list_removeitem(nums, 3)
-
-say(nums)
-
-loop n in nums
-    say(n * 2)
-end
-
-
-// ======================================
-// 7. Type conversion test
-// ======================================
-
-a = "10"
-b = 5
-
-say(convert_to_num(a) + b)
-say(convert_to_txt(b) + a)
-
-
-// ======================================
-// 8. Deep function nesting
-// ======================================
-
-fun f(x)
-    ret x + 1
-end
-
-fun g(x)
-    ret f(x) * 2
-end
-
-fun h(x)
-    ret g(f(g(x)))
-end
-
-say(h(5))
-
-
-// ======================================
-// 9. Loop safety test
-// ======================================
-
-z = 0
-
-loop while z < 5
-    say(z)
-    z = z + 1
-end
-
-
-// ======================================
-// 10. Extreme one-line parser stress test
-// ======================================
-
-say(string_reverse(convert_to_txt(math_random(1, 50) + 5 * (2 + 3))))
-
-say("=== STRESS TEST COMPLETE ===")
+say("Training complete")

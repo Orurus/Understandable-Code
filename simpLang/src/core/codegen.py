@@ -5,9 +5,15 @@ Also handles module imports (modules beyond stdlib).
 
 import os
 import sys
-from ast_nodes import *
-from lexer import Lexer
-from parser import Parser
+
+try:
+    from .ast_nodes import *
+    from .lexer import Lexer
+    from .parser import Parser
+except ImportError:
+    from ast_nodes import *
+    from lexer import Lexer
+    from parser import Parser
 
 
 class CodeGenError(Exception):
@@ -59,7 +65,8 @@ class CodeGenerator:
                 self.emit("SimpLang_input()")
 
         elif isinstance(stmt, AssignStmt):
-            self.emit(f"{stmt.name} = {self.gen_expression(stmt.expr)}")
+            target = self.gen_expression(stmt.target) if stmt.target is not None else stmt.name
+            self.emit(f"{target} = {self.gen_expression(stmt.expr)}")
 
         elif isinstance(stmt, IfStmt):
             self.emit(f"if {self.gen_expression(stmt.condition)}:")
@@ -113,15 +120,19 @@ class CodeGenerator:
             self.emit(f"return {self.gen_expression(stmt.expr)}")
 
         elif isinstance(stmt, ImportStmt):
-            # Handle module imports
+            # Handle stdlib and custom module imports.
             if stmt.name == "stdlib":
                 self.emit("import sys, os")
                 self.emit("_simp_src = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src') if '__file__' in dir() else 'src'")
                 self.emit("sys.path.insert(0, _simp_src)")
-                self.emit("import stdlib as __simp_stdlib__")
+                self.emit("import core.stdlib as __simp_stdlib__")
+                self.emit("stdlib = __simp_stdlib__")
             else:
-                # Custom module import
-                self.emit(f"import {stmt.name}")
+                self.emit("import sys, os")
+                self.emit("_simp_src = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src') if '__file__' in dir() else 'src'")
+                self.emit("sys.path.insert(0, _simp_src)")
+                self.emit("from modules.loader import load_simp_module")
+                self.emit(f"{stmt.name.split('/')[-1].split('.')[-2] if '.' in stmt.name else stmt.name} = load_simp_module('{stmt.name}')")
             self.loaded_modules[stmt.name] = True
 
         elif isinstance(stmt, ExprStmt):
@@ -198,7 +209,7 @@ def compile_simp_to_py(source_code: str, source_file: str = "<unknown>") -> str:
         "_simp_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in dir() else '.'\n"
         "_simp_src = os.path.join(_simp_dir, '..', 'src')\n"
         "sys.path.insert(0, _simp_src)\n"
-        "import src.stdlib as __simp_stdlib__\n"
+        "import core.stdlib as __simp_stdlib__\n"
         "SimpLang_input = __simp_stdlib__.simp_input\n"
         "convert_to_txt = __simp_stdlib__.convert_to_txt\n"
         "convert_to_num = __simp_stdlib__.convert_to_num\n"

@@ -2,7 +2,15 @@
 
 > **"Code so simple, it clicks."**
 
-SimpLang is a custom programming language designed to be **extremely straightforward**. Every keyword reads like English, every function name tells you **exactly** what it does, and it compiles (transpiles) directly into Python.
+SimpLang is a custom programming language designed to be **extremely straightforward**. It reads like English, keeps symbols available for power users, and compiles directly into Python.
+
+The current version also includes:
+- natural-language comparisons such as `is bigger than`, `is smaller than`, and `is equal to`
+- natural-language logical operators such as `and` and `or`
+- symbolic comparisons such as `>`, `<`, `==`, and `!=`
+- symbolic logical operators such as `&&`, `||`, `&`, and `|`
+- tensor and matrix helpers for ML-style experiments
+- advanced ML helpers for attention, optimization, and training-state ideas
 
 ---
 
@@ -56,6 +64,14 @@ The Lexer breaks code into tokens, the Parser builds an AST (Abstract Syntax Tre
 | `loop while` | `while` | Loop while a condition is true |
 | `loop x = a to b` | `for x in range(a, b+1)` | Count from a to b |
 | `loop x in y` | `for x in y` | Loop over items in a list |
+| `is bigger than` | `>` | Compare values in a beginner-friendly way |
+| `bigger than` | `>` | One symbolic comparison word + joining word |
+| `is smaller than` | `<` | Compare values in a beginner-friendly way |
+| `smaller or equal to` | `<=` | Use one symbolic word with optional joining words |
+| `is equal to` | `==` | Check for equality |
+| `is not` | `!=` | Check for inequality |
+| `and` / `&&` / `&` | `and` | Combine conditions |
+| `or` / `||` / `|` | `or` | Either condition |
 | `fun` | `def` | Define a function |
 | `ret` | `return` | Return a value |
 | `yeah` | `True` | Boolean true |
@@ -137,6 +153,13 @@ age = convert_to_num(ask())
 | `txt()` | Convert to text | `txt(42)` → `"42"` |
 
 ### Conditions — if/else/end
+
+SimpLang supports both symbolic and English-driven comparisons.
+
+- One symbolic comparison word such as `bigger`, `smaller`, or `equal`
+- Optional joining words such as `is`, `than`, and `to`
+- Use `and` / `or` only to connect separate full comparisons, not to chain comparison words together
+- Examples: `guess is bigger than secret`, `guess bigger than secret`, `if guess is bigger and if guess is equal to secret`
 
 ```python
 if score >= 100
@@ -416,6 +439,18 @@ REPL Commands:
 
 ## Modules
 
+SimpLang supports both built-in libraries and custom modules.
+
+### Built-in ML and tensor helpers
+
+The runtime now includes ML-oriented helpers under `src/modules/`:
+- `tensor_matrix_library.py` — tensor shape inference, broadcast checks, and broadcasted addition
+- `advanced_ml_library.py` — attention, optimizer state, training-loop helpers, and tensor-style utilities
+
+You can import these modules from SimpLang code using the same import system as other modules.
+
+### Custom modules
+
 You can create your own SimpLang modules and import them!
 
 Create a file `myutils.simp`:
@@ -466,21 +501,28 @@ Errors come from:
 simpLang/
 ├── simp.py                    # Main runner / CLI
 ├── README.md                  # This file
-├── test_simplang.py           # 14 tests — all pass
+├── test_simplang.py           # Regression tests for the runtime
+├── ADVANCED_ML_LIBRARY.md     # Notes on the ML helper upgrade path
+├── TENSOR_MATRIX_LIBRARY.md   # Tensor and matrix helper reference
 ├── examples/
-│   ├── hello.simp             # Hello World with input
-│   ├── calculator.simp        # Calculator using stdlib
-│   └── guess.simp             # Number guessing game
+│   ├── hello.simp             # Hello World example
+│   ├── calculator.simp        # Calculator example
+│   ├── guess.simp             # Number guessing game
+│   └── importtest.simp        # Import and module demo
 └── src/
     ├── __init__.py
-    ├── lexer.py               # Tokenizes source code
-    ├── parser.py              # Builds the Abstract Syntax Tree
-    ├── ast_nodes.py           # All AST node types
-    ├── codegen.py             # Walks AST → generates Python
-    ├── repl.py                # Interactive REPL
-    ├── stdlib.py              # Standard library (40+ functions)
-    ├── myutils.simp           # Example custom module
-    └── transpiler.py          # (legacy — old regex transpiler)
+    ├── core/
+    │   ├── lexer.py            # Tokenizes source code
+    │   ├── parser.py           # Builds the AST
+    │   ├── ast_nodes.py        # AST node types
+    │   ├── codegen.py          # Emits Python code
+    │   ├── repl.py             # Interactive REPL
+    │   ├── stdlib.py           # Standard library helpers
+    │   └── transpiler.py       # Legacy transpiler path
+    └── modules/
+        ├── tensor_matrix_library.py
+        ├── advanced_ml_library.py
+        └── myutils.simp        # Example custom module
 ```
 
 ---

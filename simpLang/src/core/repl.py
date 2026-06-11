@@ -10,10 +10,16 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from lexer import Lexer, LexerError
-from parser import Parser, ParserError
-from codegen import CodeGenerator
-import stdlib
+try:
+    from .lexer import Lexer, LexerError
+    from .parser import Parser, ParserError
+    from .codegen import CodeGenerator
+    from . import stdlib
+except ImportError:
+    from lexer import Lexer, LexerError
+    from parser import Parser, ParserError
+    from codegen import CodeGenerator
+    import stdlib
 
 
 class SimpLangREPL:

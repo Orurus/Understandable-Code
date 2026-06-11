@@ -8,7 +8,7 @@
 //   myutils.greet("Bob")
 
 fun greet(name)
-    say("Hello, " + name + "! Welcome to SimpLang modules!")
+    ret "Hello, " + name + "! Welcome to SimpLang modules!"
 end
 
 fun double(n)

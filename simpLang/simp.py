@@ -12,18 +12,21 @@ REPL:     python simp.py repl
 import sys
 import os
 
-# Add src directory to path so we can import from it
+# Add src and module directories to the Python path
 _SIMPLANG_DIR = os.path.dirname(os.path.abspath(__file__))
 _SRC_DIR = os.path.join(_SIMPLANG_DIR, "src")
-if _SRC_DIR not in sys.path:
-    sys.path.insert(0, _SRC_DIR)
+_CORE_DIR = os.path.join(_SRC_DIR, "core")
+_MODULES_DIR = os.path.join(_SRC_DIR, "modules")
+for candidate in (_SRC_DIR, _CORE_DIR, _MODULES_DIR):
+    if candidate not in sys.path:
+        sys.path.insert(0, candidate)
 
 # Import the SimpLang modules
-from lexer import Lexer, LexerError
-from parser import Parser, ParserError
-from codegen import CodeGenerator, compile_simp_to_py
-from repl import run_repl
-import stdlib
+from core.lexer import Lexer, LexerError
+from core.parser import Parser, ParserError
+from core.codegen import CodeGenerator, compile_simp_to_py
+from core.repl import run_repl
+from core import stdlib
 
 # Expose directory for other functions to use
 SIMPLANG_DIR = _SIMPLANG_DIR

@@ -43,8 +43,9 @@ class AskStmt:
 
 @dataclass
 class AssignStmt:
-    """variable = expression"""
+    """target = expression"""
     name: str = ""
+    target: Any = None
     expr: Any = None
     pos: Optional[Position] = None
 
