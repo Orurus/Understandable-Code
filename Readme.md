@@ -1,4 +1,4 @@
-# SIMPLANG - Simplistic coding language
+# SimpleLanaguage - Simplistic coding language
 Created with ai,
 But! don't judge a book by its cover, its actually decent (From my perspective).
 Ignore the ML and Tensor libraries, read the Info.md on how to use.
