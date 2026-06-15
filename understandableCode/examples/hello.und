@@ -1,0 +1,71 @@
+import graphics
+import stdlib
+
+canvas = graphics.create_canvas_2d(20, 20)
+
+snake = [(10, 10)]
+direction = "right"
+
+food_x = stdlib.math_random(0, 19)
+food_y = stdlib.math_random(0, 19)
+
+loop while graphics.window_should_close() is equal to nah
+
+    canvas.clear()
+
+    head = snake[0]
+
+    // input handling
+    if graphics.get_key_pressed("right") is equal to yeah
+        direction = "right"
+    end
+
+    if graphics.get_key_pressed("left") is equal to yeah
+        direction = "left"
+    end
+
+    if graphics.get_key_pressed("up") is equal to yeah
+        direction = "up"
+    end
+
+    if graphics.get_key_pressed("down") is equal to yeah
+        direction = "down"
+    end
+
+    // movement
+    if direction is equal to "right"
+        new_head = (head[0] + 1, head[1])
+    end
+
+    if direction is equal to "left"
+        new_head = (head[0] - 1, head[1])
+    end
+
+    if direction is equal to "up"
+        new_head = (head[0], head[1] - 1)
+    end
+
+    if direction is equal to "down"
+        new_head = (head[0], head[1] + 1)
+    end
+
+    snake = [new_head] + snake
+
+    if new_head[0] is equal to food_x and new_head[1] is equal to food_y
+
+        food_x = stdlib.math_random(0, 19)
+        food_y = stdlib.math_random(0, 19)
+
+    else
+        snake = snake.take_from_index_up_to(0, len(snake) - 2)
+    end
+
+    loop segment in snake
+        canvas.set_pixel(segment[0], segment[1], "green")
+    end
+
+    canvas.set_pixel(food_x, food_y, "red")
+
+    graphics.show(canvas)
+
+end

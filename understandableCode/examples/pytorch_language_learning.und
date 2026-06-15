@@ -1,0 +1,3 @@
+import stdlib
+number = math_random(1,100)
+say (number)
